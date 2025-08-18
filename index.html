@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teamwork Survey</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Teamwork Survey</h1>
+    <p>Please answer the following questions:</p>
+  </header>
+
+  <main>
+    <form id="surveyForm">
+      <div class="question">
+        <label for="q1">1. How well does your team communicate?</label><br>
+        <select id="q1" name="q1" required>
+          <option value="">--Choose an option--</option>
+          <option value="Excellent">Excellent</option>
+          <option value="Good">Good</option>
+          <option value="Fair">Fair</option>
+          <option value="Poor">Poor</option>
+        </select>
+      </div>
+
+      <div class="question">
+        <label for="q2">2. What’s one thing that could improve teamwork?</label><br>
+        <textarea id="q2" name="q2" rows="3" required></textarea>
+      </div>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <div id="thankYou" class="hidden">
+      <h2>Thank you for completing the survey!</h2>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
