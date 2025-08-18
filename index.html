@@ -15,39 +15,44 @@
     </header>
 
     <main>
-        <form id="surveyForm" novalidate>
-            <!-- Honeypot: keep hidden via CSS; leave empty means human -->
-            <input type="text" name="honeypot" id="honeypot" autocomplete="off" tabindex="-1" aria-hidden="true"
-                class="hp">
+        <!-- Hidden iframe to receive the response -->
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
-            <div class="question">
-                <label for="q1">1. How well does your team communicate?</label><br>
-                <select id="q1" name="q1" required>
-                    <option value="">--Choose an option--</option>
-                    <option>Excellent</option>
-                    <option>Good</option>
-                    <option>Fair</option>
-                    <option>Poor</option>
-                </select>
-            </div>
+<form id="surveyForm" action="https://script.google.com/macros/s/AKfycbyDClBWeoNWS234v7qu9l7sR1AGAQP9pIIMfAQc7rHrBlM0eK9rE993q2ZUNwcCjTM/exec" method="POST" target="hidden_iframe" novalidate>
+  <input type="text" name="honeypot" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-            <div class="question">
-                <label for="q2">2. What’s one thing that could improve teamwork?</label><br>
-                <textarea id="q2" name="q2" rows="3" required></textarea>
-            </div>
+  <div class="question">
+    <label for="q1">1. How well does your team communicate?</label><br>
+    <select id="q1" name="q1" required>
+      <option value="">--Choose an option--</option>
+      <option>Excellent</option>
+      <option>Good</option>
+      <option>Fair</option>
+      <option>Poor</option>
+    </select>
+  </div>
 
-            <input type="hidden" name="surveyId" value="teamwork-2025">
-            <input type="hidden" name="respondentId" id="respondentId" value="">
-            <input type="hidden" name="utm_source" id="utm_source" value="">
-            <input type="hidden" name="utm_medium" id="utm_medium" value="">
-            <input type="hidden" name="utm_campaign" id="utm_campaign" value="">
+  <div class="question">
+    <label for="q2">2. What’s one thing that could improve teamwork?</label><br>
+    <textarea id="q2" name="q2" rows="3" required></textarea>
+  </div>
 
-            <button type="submit">Submit</button>
-        </form>
+  <!-- metadata -->
+  <input type="hidden" name="timestamp">    <!-- sheet will fill this based on header; safe to include -->
+  <input type="hidden" name="surveyId" value="teamwork-2025">
+  <input type="hidden" name="respondentId" id="respondentId" value="">
+  <input type="hidden" name="utm_source" id="utm_source" value="">
+  <input type="hidden" name="utm_medium" id="utm_medium" value="">
+  <input type="hidden" name="utm_campaign" id="utm_campaign" value="">
+  <input type="hidden" name="userAgent" id="userAgent" value="">
 
-        <div id="thankYou" class="hidden">
-            <h2>Thank you for completing the survey!</h2>
-        </div>
+  <button type="submit">Submit</button>
+</form>
+
+<div id="thankYou" class="hidden">
+  <h2>Thank you for completing the survey!</h2>
+</div>
+
     </main>
 
     <script src="script.js"></script>
