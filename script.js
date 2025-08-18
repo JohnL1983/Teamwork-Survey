@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("surveyForm");
   const thankYou = document.getElementById("thankYou");
   const iframe = document.getElementById("hidden_iframe");
+  const submitBtn = form.querySelector('button[type="submit"]');
   const DONE_KEY = "survey_teamwork_2025_done";
 
   // Simple UUID
@@ -12,11 +13,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Pre-fill metadata
   const params = new URLSearchParams(location.search);
-  document.getElementById("respondentId").value = makeUUID();
-  document.getElementById("utm_source").value = params.get("utm_source") || "";
-  document.getElementById("utm_medium").value = params.get("utm_medium") || "";
-  document.getElementById("utm_campaign").value = params.get("utm_campaign") || "";
-  document.getElementById("userAgent").value = navigator.userAgent;
+  const respondentIdEl = document.getElementById("respondentId");
+  const utmSourceEl = document.getElementById("utm_source");
+  const utmMediumEl = document.getElementById("utm_medium");
+  const utmCampaignEl = document.getElementById("utm_campaign");
+  const userAgentEl = document.getElementById("userAgent");
+
+  if (respondentIdEl) respondentIdEl.value = makeUUID();
+  if (utmSourceEl) utmSourceEl.value = params.get("utm_source") || "";
+  if (utmMediumEl) utmMediumEl.value = params.get("utm_medium") || "";
+  if (utmCampaignEl) utmCampaignEl.value = params.get("utm_campaign") || "";
+  if (userAgentEl) userAgentEl.value = navigator.userAgent;
 
   // Duplicate UX
   if (localStorage.getItem(DONE_KEY) === "true") {
@@ -24,18 +31,40 @@ document.addEventListener("DOMContentLoaded", () => {
     thankYou.classList.remove("hidden");
   }
 
-  // When the iframe loads (after submit), show thank-you
-  iframe.addEventListener("load", () => {
+  // Show thank-you and lock UI
+  const showThanks = () => {
     form.classList.add("hidden");
     thankYou.classList.remove("hidden");
     localStorage.setItem(DONE_KEY, "true");
+  };
+
+  // When the iframe loads (after submit), show thank-you
+  iframe?.addEventListener("load", () => {
+    showThanks();
   });
 
-  // Client-side validity
+  // Client-side validity + fallback timer
   form.addEventListener("submit", (e) => {
     if (!form.checkValidity()) {
       e.preventDefault();
       form.reportValidity();
+      return;
     }
+
+    // Disable button to prevent accidental double submits
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.dataset.originalText = submitBtn.textContent;
+      submitBtn.textContent = "Submitting…";
+    }
+
+    // Fallback: if iframe 'load' doesn't fire (e.g., X-Frame-Options not allowed),
+    // optimistically show thank-you after 1500ms. The POST still goes through.
+    // Do NOT preventDefault here; let the form submit to the hidden iframe.
+    setTimeout(() => {
+      // Only show if user hasn't already been thanked (e.g., via iframe load)
+      if (!thankYou || !thankYou.classList.contains("hidden")) return;
+      showThanks();
+    }, 1500);
   });
 });
