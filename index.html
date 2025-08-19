@@ -1,61 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teamwork Survey</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teamwork Survey</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <header>
-        <h1>Teamwork Survey</h1>
-        <p>Please answer the following questions:</p>
-    </header>
+  <header>
+    <h1>Teamwork Survey</h1>
+    <p>Please answer the following questions:</p>
+  </header>
 
-    <main>
-        <!-- Hidden iframe to receive the response -->
-<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-<form id="surveyForm" action="https://script.google.com/macros/s/AKfycbxScwVa90dGfh5swGpz1Gwh9EAeHd_M65dafcWBSn6NpnSiFauookNe4CfVme-_ezkV/exec" method="POST" target="hidden_iframe" novalidate>
+  <main>
+    <!-- Hidden iframe to receive the response -->
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
-  <input type="text" name="honeypot" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <!-- POSTs directly to your Apps Script Web App (no CORS issues via iframe) -->
+    <form
+      id="surveyForm"
+      action="https://script.google.com/macros/s/AKfycbxScwVa90dGfh5swGpz1Gwh9EAeHd_M65dafcWBSn6NpnSiFauookNe4CfVme-_ezkV/exec"
+      method="POST"
+      target="hidden_iframe"
+      novalidate
+    >
+      <!-- Honeypot (spam trap). Keep empty. -->
+      <input type="text" name="honeypot" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-  <div class="question">
-    <label for="q1">1. How well does your team communicate?</label><br>
-    <select id="q1" name="q1" required>
-      <option value="">--Choose an option--</option>
-      <option>Excellent</option>
-      <option>Good</option>
-      <option>Fair</option>
-      <option>Poor</option>
-    </select>
-  </div>
+      <!-- Q1: Yes/No -->
+      <fieldset class="question">
+        <legend>1. Do you think that Teamwork has a better workflow than Monday.com?</legend>
+        <label><input type="radio" name="q1_workflow_better" value="Yes" required> Yes</label>
+        <label><input type="radio" name="q1_workflow_better" value="No"> No</label>
+      </fieldset>
 
-  <div class="question">
-    <label for="q2">2. What’s one thing that could improve teamwork?</label><br>
-    <textarea id="q2" name="q2" rows="3" required></textarea>
-  </div>
+      <!-- Q2: Yes/No -->
+      <fieldset class="question">
+        <legend>2. Do you think Teamwork is has better usability than Monday.com? (yes or no)</legend>
+        <label><input type="radio" name="q2_usability_better" value="Yes" required> Yes</label>
+        <label><input type="radio" name="q2_usability_better" value="No"> No</label>
+      </fieldset>
 
-  <!-- metadata -->
-  <input type="hidden" name="timestamp">    <!-- sheet will fill this based on header; safe to include -->
-  <input type="hidden" name="surveyId" value="teamwork-2025">
-  <input type="hidden" name="respondentId" id="respondentId" value="">
-  <input type="hidden" name="utm_source" id="utm_source" value="">
-  <input type="hidden" name="utm_medium" id="utm_medium" value="">
-  <input type="hidden" name="utm_campaign" id="utm_campaign" value="">
-  <input type="hidden" name="userAgent" id="userAgent" value="">
+      <!-- Q3: Scale 1–5 -->
+      <fieldset class="question">
+        <legend>3. How do you feel about overall about transitioning to from Monday.com to Teamwork?</legend>
+        <div class="scale">
+          <label><input type="radio" name="q3_transition_feeling" value="1" required> 1</label>
+          <label><input type="radio" name="q3_transition_feeling" value="2"> 2</label>
+          <label><input type="radio" name="q3_transition_feeling" value="3"> 3</label>
+          <label><input type="radio" name="q3_transition_feeling" value="4"> 4</label>
+          <label><input type="radio" name="q3_transition_feeling" value="5"> 5</label>
+        </div>
+      </fieldset>
 
-  <button type="submit">Submit</button>
-</form>
+      <!-- Q4: Open text -->
+      <div class="question">
+        <label for="q4_open_feedback">4. Do you have any other questions, concerns, comments, thoughts, or anything else regarding your experience with Teamwork that you would like us to know?</label>
+        <textarea id="q4_open_feedback" name="q4_open_feedback" rows="4" maxlength="2000" required></textarea>
+      </div>
 
-<div id="thankYou" class="hidden">
-  <h2>Thank you for completing the survey!</h2>
-</div>
+      <button type="submit">Submit</button>
+    </form>
 
-    </main>
+    <div id="thankYou" class="hidden">
+      <h2>Thank you for completing the survey!</h2>
+    </div>
+  </main>
 
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
-
 </html>
