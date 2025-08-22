@@ -128,10 +128,6 @@ body {
   height: 500px;
   place-items: center;
   padding: 16px;
-  overflow: clip;
-  /* or overflow:hidden; */
-  /* optional: create an isolation layer for transforms */
-  contain: layout paint;
 }
 
 .stage.active {
@@ -150,7 +146,6 @@ body {
   border: 1px solid rgba(255, 255, 255, .06);
   height: 250px;
   /* leaves room for the fixed Next/Submit button */
-  overflow: auto;
 }
 
 .question-title {
