@@ -1,71 +1,213 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #f8f9fa;
-  color: #333;
+/* ========== Brand ========== */
+:root{
+  --snap-orange:#ff4c06;
+  --snap-teal:#00719b;
+  --snap-navy:#000a1f;
+  --snap-magenta:#c00a82;
+
+  --bg:#0b0f1a;
+  --ink:#f6f7fb;
+  --muted:#a9b0c0;
+
+  --card-bg: #06101aee;
+  --radius: 18px;
+  --shadow: 0 8px 30px rgba(0,10,31,.25);
 }
 
-header {
-  background: #4a90e2;
-  color: white;
-  padding: 1rem;
-  text-align: center;
+/* ========== Base Reset ========== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+  color:var(--ink);
+  background: radial-gradient(1500px 600px at 10% -10%, #071225 0%, transparent 60%),
+              radial-gradient(1200px 500px at 110% 0%, #0b1f2f 0%, transparent 55%),
+              var(--bg);
 }
 
-main {
-  padding: 1.5rem;
-  max-width: 600px;
-  margin: auto;
+/* ========== A11y helpers ========== */
+.visually-hidden{
+  position:absolute !important;
+  clip: rect(1px,1px,1px,1px);
+  clip-path: inset(50%);
+  height:1px;width:1px;overflow:hidden;white-space:nowrap;
 }
 
-.question {
-  margin-bottom: 1.5rem;
+/* ========== Header ========== */
+.site-header{
+  display:grid;
+  place-items:center;
+  padding:28px 16px 8px;
+}
+.logo{
+  width:84px;
+  height:auto;
+  display:block;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,.25));
 }
 
-label {
-  font-weight: bold;
+/* ========== Hero (abstract art) ========== */
+.hero{
+  position:relative;
+  min-height:46vh;
+  display:grid;
+  place-items:center;
+  padding:40px 16px 64px;
+  overflow:hidden;
+}
+.hero-art{
+  position:absolute; inset:0;
+  background:
+    /* sweeping conic ring */
+    conic-gradient(from 210deg at 70% 20%,
+      transparent 0 35deg,
+      var(--snap-orange) 35deg 90deg,
+      transparent 90deg 110deg,
+      var(--snap-magenta) 110deg 180deg,
+      transparent 180deg 210deg,
+      var(--snap-teal) 210deg 285deg,
+      transparent 285deg 360deg),
+    /* grainy blobs */
+    radial-gradient(220px 180px at 12% 75%, rgba(255,76,6,.15), transparent 60%),
+    radial-gradient(260px 220px at 88% 15%, rgba(0,113,155,.18), transparent 60%),
+    radial-gradient(180px 200px at 50% 60%, rgba(192,10,130,.12), transparent 60%),
+    linear-gradient(180deg, rgba(0,10,31,.8), rgba(0,10,31,.7));
+  filter: saturate(115%) contrast(105%);
+  animation: slow-pan 24s linear infinite;
+  z-index:0;
+}
+@keyframes slow-pan{
+  0%{transform:scale(1) translate3d(0,0,0)}
+  50%{transform:scale(1.05) translate3d(0,-1.5%,0)}
+  100%{transform:scale(1) translate3d(0,0,0)}
 }
 
-select,
-textarea {
-  width: 100%;
-  padding: 0.5rem;
-  margin-top: 0.3rem;
+/* Start / Progress Button */
+.cta{
+  position:relative;
+  z-index:1;
+  padding:16px 24px;
+  border-radius:999px;
+  border:0;
+  color:white;
+  font-weight:700;
+  letter-spacing:.3px;
+  background:
+    linear-gradient(135deg, var(--snap-orange), var(--snap-magenta));
+  box-shadow: 0 10px 30px rgba(255,76,6,.35), 0 6px 18px rgba(192,10,130,.25);
+  cursor:pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.cta:hover{ transform:translateY(-2px); }
+.cta:active{ transform:translateY(0); }
+
+/* ========== Steps / Questions ========== */
+.steps{
+  max-width:760px;
+  margin: 0 auto;
+  padding: 0 16px 120px;
+}
+.hp{display:none}
+
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)),
+              var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 20px 16px;
+  margin: 16px 0;
+  border:1px solid rgba(255,255,255,.06);
+  transform-origin: 50% 60%;
 }
 
-button {
-  background: #4a90e2;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.2rem;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 1rem;
+/* Color accents per step */
+.question[data-step="0"]{ border-left:6px solid var(--snap-orange); }
+.question[data-step="1"]{ border-left:6px solid var(--snap-teal); }
+.question[data-step="2"]{ border-left:6px solid var(--snap-magenta); }
+.question[data-step="3"]{ border-left:6px solid var(--snap-orange); }
+
+.question-title{
+  font-size:1.1rem;
+  margin:0 0 12px;
 }
 
-button:hover {
-  background: #357abd;
+.option{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  margin-right:12px;
+  border:1px solid rgba(255,255,255,.06);
+}
+.scale label{
+  display:inline-block;
+  padding:8px 10px;
+  margin-right:6px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.1);
+  background: rgba(0,0,0,.1);
 }
 
-.hidden {
-  display: none;
+/* Animation states */
+.question{ display:none; }
+.question.active{ display:block; animation: inUp .55s ease both; }
+.question.out-left{ animation: outLeft .45s ease forwards; }
+.question.out-right{ animation: outRight .45s ease forwards; }
+
+@keyframes inUp{
+  from{ opacity:0; transform: translateY(16px) scale(.98); }
+  to{ opacity:1; transform: translateY(0) scale(1); }
+}
+@keyframes outLeft{
+  to{ opacity:0; transform: translateX(-6%) scale(.98); }
+}
+@keyframes outRight{
+  to{ opacity:0; transform: translateX(6%) scale(.98); }
 }
 
-#thankYou {
-  text-align: center;
-  margin-top: 2rem;
+/* ========== Floating Progress Button ========== */
+.progress-btn{
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding:14px 22px;
+  border:0;
+  border-radius: 999px;
+  font-weight:700;
+  letter-spacing:.25px;
+  color:#fff;
+  background: linear-gradient(135deg, var(--snap-teal), var(--snap-orange));
+  box-shadow: 0 10px 24px rgba(0,113,155,.35), 0 6px 14px rgba(0,10,31,.4);
+  cursor:pointer;
+  opacity:0; pointer-events:none;
+  transition: opacity .3s ease, transform .3s ease, box-shadow .2s ease;
+}
+.progress-btn.show{ opacity:1; pointer-events:auto; }
+.progress-btn:disabled{ opacity:.6; cursor:not-allowed; }
+.progress-btn[data-state="submit"]{
+  background: linear-gradient(135deg, var(--snap-magenta), var(--snap-orange));
 }
 
-/* Honeypot */
-.hp {
-  position: absolute !important;
-  left: -10000px !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
+/* When the CTA docks, fade the hero’s button, show the progress button */
+.hero .cta.dock{ animation: dock .5s ease forwards; }
+@keyframes dock{
+  to{ opacity:0; transform: translateY(30px) scale(.96); }
 }
 
-/* 1–5 scale spacing */
-.scale label { margin-right: 0.75rem; font-weight: normal; }
-.scale input[type="radio"] { margin-right: 0.25rem; }
+/* ========== Thank you ========== */
+.thankyou{
+  text-align:center;
+  padding:60px 16px 120px;
+}
+.thankyou h2{ margin-bottom:8px; }
+
+/* Responsive tweaks */
+@media (max-width: 560px){
+  .card{ padding:16px 14px; }
+  .steps{ padding-bottom: 140px; }
+}

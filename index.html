@@ -7,66 +7,90 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Teamwork Survey</h1>
-    <p>Please answer the following questions:</p>
+  <header class="site-header">
+    <img src="snapshot_icon_CORE.webp" alt="Snapshot logo" class="logo" />
   </header>
 
   <main>
-    <!-- Hidden iframe to receive the response -->
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+    <!-- ABSTRACT ART + START -->
+    <section class="hero" aria-labelledby="hero-title">
+      <h1 id="hero-title" class="visually-hidden">Teamwork Survey</h1>
 
-    <!-- POSTs directly to your Apps Script Web App (no CORS issues via iframe) -->
+      <!-- purely decorative background -->
+      <div class="hero-art" aria-hidden="true"></div>
+
+      <button id="ctaBtn" class="cta">Start Survey</button>
+    </section>
+
+    <!-- Hidden iframe to receive the response -->
+    <iframe name="hidden_iframe" id="hidden_iframe" title="submission target" class="visually-hidden"></iframe>
+
+    <!-- Survey -->
     <form
       id="surveyForm"
       action="https://script.google.com/macros/s/AKfycbzwxnFF3-3wHcDUhCh0rRgwh0RgEZDHX04KoYrejHt9FndvfhS-108B1v2MVwbj7RLm/exec"
       method="POST"
       target="hidden_iframe"
       novalidate
+      aria-live="polite"
     >
       <!-- Honeypot (spam trap). Keep empty. -->
       <input type="text" name="honeypot" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-      <!-- Q1: Yes/No -->
-      <fieldset class="question">
-        <legend>1. Do you think that Teamwork has a better workflow than Monday.com?</legend>
-        <label><input type="radio" name="q1_workflow_better" value="Yes" required> Yes</label>
-        <label><input type="radio" name="q1_workflow_better" value="No"> No</label>
-      </fieldset>
+      <!-- Steps wrapper (for animations & layout) -->
+      <div id="steps" class="steps">
 
-      <!-- Q2: Yes/No -->
-      <fieldset class="question">
-        <legend>2. Do you think Teamwork has better usability than Monday.com? (yes or no)</legend>
-        <label><input type="radio" name="q2_usability_better" value="Yes" required> Yes</label>
-        <label><input type="radio" name="q2_usability_better" value="No"> No</label>
-      </fieldset>
+        <!-- Q1 -->
+        <fieldset class="question card" data-step="0">
+          <legend class="question-title">1. Do you think that Teamwork has a better workflow than Monday.com?</legend>
+          <label class="option"><input type="radio" name="q1_workflow_better" value="Yes" required> Yes</label>
+          <label class="option"><input type="radio" name="q1_workflow_better" value="No"> No</label>
+        </fieldset>
 
-      <!-- Q3: Scale 1–5 -->
-      <fieldset class="question">
-        <legend>3. How do you feel overall about transitioning from Monday.com to Teamwork?</legend>
-        <div class="scale">
-          <label><input type="radio" name="q3_transition_feeling" value="1" required> 1</label>
-          <label><input type="radio" name="q3_transition_feeling" value="2"> 2</label>
-          <label><input type="radio" name="q3_transition_feeling" value="3"> 3</label>
-          <label><input type="radio" name="q3_transition_feeling" value="4"> 4</label>
-          <label><input type="radio" name="q3_transition_feeling" value="5"> 5</label>
+        <!-- Q2 -->
+        <fieldset class="question card" data-step="1">
+          <legend class="question-title">2. Do you think Teamwork has better usability than Monday.com? (yes or no)</legend>
+          <label class="option"><input type="radio" name="q2_usability_better" value="Yes" required> Yes</label>
+          <label class="option"><input type="radio" name="q2_usability_better" value="No"> No</label>
+        </fieldset>
+
+        <!-- Q3 -->
+        <fieldset class="question card" data-step="2">
+          <legend class="question-title">3. How do you feel overall about transitioning from Monday.com to Teamwork?</legend>
+          <div class="scale">
+            <label><input type="radio" name="q3_transition_feeling" value="1" required> 1</label>
+            <label><input type="radio" name="q3_transition_feeling" value="2"> 2</label>
+            <label><input type="radio" name="q3_transition_feeling" value="3"> 3</label>
+            <label><input type="radio" name="q3_transition_feeling" value="4"> 4</label>
+            <label><input type="radio" name="q3_transition_feeling" value="5"> 5</label>
+          </div>
+        </fieldset>
+
+        <!-- Q4 -->
+        <div class="question card" data-step="3">
+          <label class="question-title" for="q4_open_feedback">
+            4. Do you have any other questions, concerns, comments, thoughts, or anything else regarding your experience with Teamwork that you would like us to know?
+          </label>
+          <textarea id="q4_open_feedback" name="q4_open_feedback" rows="5" maxlength="2000" required></textarea>
         </div>
-      </fieldset>
 
-      <!-- Q4: Open text -->
-      <div class="question">
-        <label for="q4_open_feedback">4. Do you have any other questions, concerns, comments, thoughts, or anything else regarding your experience with Teamwork that you would like us to know?</label>
-        <textarea id="q4_open_feedback" name="q4_open_feedback" rows="4" maxlength="2000" required></textarea>
       </div>
 
-      <button type="submit">Submit</button>
+      <!-- Native submit kept for progressive enhancement; hidden until final step -->
+      <button id="nativeSubmit" type="submit" class="visually-hidden">Submit</button>
     </form>
 
-    <div id="thankYou" class="hidden">
+    <!-- Floating progress button (Start → Next → Submit) -->
+    <button id="progressBtn" class="progress-btn" data-state="start" aria-live="polite">
+      Start Survey
+    </button>
+
+    <div id="thankYou" class="thankyou" hidden>
       <h2>Thank you for completing the survey!</h2>
+      <p>Your responses were submitted successfully.</p>
     </div>
   </main>
 
-  <script src="script.js"></script>
+  <script src="app.js" defer></script>
 </body>
 </html>
