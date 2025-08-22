@@ -5,13 +5,13 @@
   --snap-navy:#000a1f;
   --snap-magenta:#c00a82;
 
-  --bg:#0b0f1a;
   --ink:#f6f7fb;
-  --muted:#a9b0c0;
-
   --card-bg: #06101aee;
   --radius: 18px;
   --shadow: 0 8px 30px rgba(0,10,31,.25);
+
+  /* Backdrop darkness (tune as needed) */
+  --backdrop-darkness: .45;
 }
 
 /* ========== Base Reset ========== */
@@ -19,19 +19,40 @@
 html,body{height:100%}
 body{
   margin:0;
-  font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial,sans-serif;
   color:var(--ink);
-  background: radial-gradient(1500px 600px at 10% -10%, #071225 0%, transparent 60%),
-              radial-gradient(1200px 500px at 110% 0%, #0b1f2f 0%, transparent 55%),
-              var(--bg);
+  background:#000; /* fallback under backdrop */
 }
 
-/* ========== A11y helpers ========== */
+/* A11y */
 .visually-hidden{
   position:absolute !important;
   clip: rect(1px,1px,1px,1px);
   clip-path: inset(50%);
   height:1px;width:1px;overflow:hidden;white-space:nowrap;
+}
+
+/* ========== Full-viewport Spray-Paint Backdrop ========== */
+.backdrop{
+  position:fixed; inset:0;
+  z-index:-1;
+  background:
+    /* soft noise-ish specks */
+    radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.06), transparent 60%) repeat,
+    radial-gradient(2px 2px at 70% 60%, rgba(255,255,255,.05), transparent 60%) repeat,
+    /* color bursts */
+    radial-gradient(420px 340px at 12% 22%, rgba(255,76,6,.42), transparent 60%),
+    radial-gradient(520px 420px at 80% 18%, rgba(0,113,155,.40), transparent 62%),
+    radial-gradient(360px 300px at 28% 78%, rgba(192,10,130,.38), transparent 65%),
+    radial-gradient(480px 360px at 82% 72%, rgba(255,76,6,.30), transparent 65%),
+    radial-gradient(380px 340px at 50% 50%, rgba(0,10,31,.50), transparent 70%);
+  background-blend-mode: screen, screen, normal, normal, normal, normal, normal;
+  filter: saturate(120%) contrast(105%) blur(.2px);
+}
+.backdrop::after{
+  content:"";
+  position:absolute; inset:0;
+  background: rgba(0,10,31,var(--backdrop-darkness));
 }
 
 /* ========== Header ========== */
@@ -47,43 +68,13 @@ body{
   filter: drop-shadow(0 6px 18px rgba(0,0,0,.25));
 }
 
-/* ========== Hero (abstract art) ========== */
+/* ========== Hero (CTA only; backdrop is the art) ========== */
 .hero{
-  position:relative;
   min-height:46vh;
   display:grid;
   place-items:center;
   padding:40px 16px 64px;
-  overflow:hidden;
 }
-.hero-art{
-  position:absolute; inset:0;
-  background:
-    /* sweeping conic ring */
-    conic-gradient(from 210deg at 70% 20%,
-      transparent 0 35deg,
-      var(--snap-orange) 35deg 90deg,
-      transparent 90deg 110deg,
-      var(--snap-magenta) 110deg 180deg,
-      transparent 180deg 210deg,
-      var(--snap-teal) 210deg 285deg,
-      transparent 285deg 360deg),
-    /* grainy blobs */
-    radial-gradient(220px 180px at 12% 75%, rgba(255,76,6,.15), transparent 60%),
-    radial-gradient(260px 220px at 88% 15%, rgba(0,113,155,.18), transparent 60%),
-    radial-gradient(180px 200px at 50% 60%, rgba(192,10,130,.12), transparent 60%),
-    linear-gradient(180deg, rgba(0,10,31,.8), rgba(0,10,31,.7));
-  filter: saturate(115%) contrast(105%);
-  animation: slow-pan 24s linear infinite;
-  z-index:0;
-}
-@keyframes slow-pan{
-  0%{transform:scale(1) translate3d(0,0,0)}
-  50%{transform:scale(1.05) translate3d(0,-1.5%,0)}
-  100%{transform:scale(1) translate3d(0,0,0)}
-}
-
-/* Start / Progress Button */
 .cta{
   position:relative;
   z-index:1;
@@ -93,14 +84,12 @@ body{
   color:white;
   font-weight:700;
   letter-spacing:.3px;
-  background:
-    linear-gradient(135deg, var(--snap-orange), var(--snap-magenta));
+  background: linear-gradient(135deg, var(--snap-orange), var(--snap-magenta));
   box-shadow: 0 10px 30px rgba(255,76,6,.35), 0 6px 18px rgba(192,10,130,.25);
   cursor:pointer;
-  transition: transform .2s ease, box-shadow .2s ease;
+  transition: transform .2s ease, box-shadow .2s ease, opacity .3s ease;
 }
-.cta:hover{ transform:translateY(-2px); }
-.cta:active{ transform:translateY(0); }
+.hero .cta.dock{ opacity:0; transform: translateY(30px) scale(.96); }
 
 /* ========== Steps / Questions ========== */
 .steps{
@@ -111,14 +100,13 @@ body{
 .hp{display:none}
 
 .card{
-  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)),
-              var(--card-bg);
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)), var(--card-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 20px 20px 16px;
   margin: 16px 0;
   border:1px solid rgba(255,255,255,.06);
-  transform-origin: 50% 60%;
+  transform-origin: 50% 50%;
 }
 
 /* Color accents per step */
@@ -127,45 +115,82 @@ body{
 .question[data-step="2"]{ border-left:6px solid var(--snap-magenta); }
 .question[data-step="3"]{ border-left:6px solid var(--snap-orange); }
 
-.question-title{
-  font-size:1.1rem;
-  margin:0 0 12px;
-}
-
+.question-title{font-size:1.1rem;margin:0 0 12px;}
 .option{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 12px;
-  border-radius: 12px;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 12px; border-radius:12px;
   background: rgba(255,255,255,.03);
   margin-right:12px;
   border:1px solid rgba(255,255,255,.06);
 }
 .scale label{
-  display:inline-block;
-  padding:8px 10px;
-  margin-right:6px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.1);
+  display:inline-block; padding:8px 10px; margin-right:6px;
+  border-radius:12px; border:1px solid rgba(255,255,255,.1);
   background: rgba(0,0,0,.1);
 }
 
-/* Animation states */
+/* Visibility gates */
 .question{ display:none; }
-.question.active{ display:block; animation: inUp .55s ease both; }
-.question.out-left{ animation: outLeft .45s ease forwards; }
-.question.out-right{ animation: outRight .45s ease forwards; }
+.question.active{ display:block; }
 
-@keyframes inUp{
-  from{ opacity:0; transform: translateY(16px) scale(.98); }
-  to{ opacity:1; transform: translateY(0) scale(1); }
+/* ========== Unique Animations (in/out) ========== */
+/* IN 1: roll in from left */
+.in-roll-left{ animation: inRollLeft .6s cubic-bezier(.2,.75,.25,1) both; }
+@keyframes inRollLeft{
+  from{opacity:0; transform: translateX(-60px) rotate(-8deg) scale(.98);}
+  70%{opacity:1;}
+  to{opacity:1; transform: translateX(0) rotate(0) scale(1);}
 }
-@keyframes outLeft{
-  to{ opacity:0; transform: translateX(-6%) scale(.98); }
+
+/* OUT 1: explode (scale up + fade/blur) */
+.out-explode{ animation: outExplode .45s ease forwards; }
+@keyframes outExplode{
+  to{ opacity:0; transform: scale(1.12); filter: blur(2px); }
 }
-@keyframes outRight{
-  to{ opacity:0; transform: translateX(6%) scale(.98); }
+
+/* IN 2: fade from top */
+.in-fade-down{ animation: inFadeDown .55s ease both; }
+@keyframes inFadeDown{
+  from{opacity:0; transform: translateY(-26px);}
+  to{opacity:1; transform: translateY(0);}
+}
+
+/* OUT 2: hinge/curl down (rotateX from top) */
+.out-hinge{
+  transform-origin: 50% 0%;
+  animation: outHinge .55s cubic-bezier(.25,.55,.2,.95) forwards;
+}
+@keyframes outHinge{
+  to{ opacity:0; transform: rotateX(78deg) translateY(6px); filter: blur(1px); }
+}
+
+/* IN 3: skewed slide from right */
+.in-skew-right{ animation: inSkewRight .55s cubic-bezier(.2,.75,.25,1) both; }
+@keyframes inSkewRight{
+  from{opacity:0; transform: translateX(50px) skewX(-6deg);}
+  to{opacity:1; transform: translateX(0) skewX(0);}
+}
+
+/* OUT 3: slide left with blur */
+.out-left-blur{ animation: outLeftBlur .45s ease forwards; }
+@keyframes outLeftBlur{
+  to{ opacity:0; transform: translateX(-48px); filter: blur(2px); }
+}
+
+/* IN 4: soft pop */
+.in-pop{ animation: inPop .55s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes inPop{
+  from{opacity:0; transform: scale(.96) translateY(10px);}
+  to{opacity:1; transform: scale(1) translateY(0);}
+}
+
+/* OUT 4: curtain to right (rotateY) */
+.out-curtain-right{
+  transform-origin: 100% 50%;
+  animation: outCurtainRight .5s ease forwards;
+}
+@keyframes outCurtainRight{
+  to{ opacity:0; transform: translateX(30px) rotateY(-35deg); filter: blur(1px); }
 }
 
 /* ========== Floating Progress Button ========== */
@@ -176,10 +201,8 @@ body{
   transform: translateX(-50%);
   z-index: 10;
   padding:14px 22px;
-  border:0;
-  border-radius: 999px;
-  font-weight:700;
-  letter-spacing:.25px;
+  border:0; border-radius:999px;
+  font-weight:700; letter-spacing:.25px;
   color:#fff;
   background: linear-gradient(135deg, var(--snap-teal), var(--snap-orange));
   box-shadow: 0 10px 24px rgba(0,113,155,.35), 0 6px 14px rgba(0,10,31,.4);
@@ -193,20 +216,11 @@ body{
   background: linear-gradient(135deg, var(--snap-magenta), var(--snap-orange));
 }
 
-/* When the CTA docks, fade the hero’s button, show the progress button */
-.hero .cta.dock{ animation: dock .5s ease forwards; }
-@keyframes dock{
-  to{ opacity:0; transform: translateY(30px) scale(.96); }
-}
-
-/* ========== Thank you ========== */
-.thankyou{
-  text-align:center;
-  padding:60px 16px 120px;
-}
+/* Thank you */
+.thankyou{ text-align:center; padding:60px 16px 120px; }
 .thankyou h2{ margin-bottom:8px; }
 
-/* Responsive tweaks */
+/* Responsive */
 @media (max-width: 560px){
   .card{ padding:16px 14px; }
   .steps{ padding-bottom: 140px; }

@@ -7,18 +7,17 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Full-viewport abstract art backdrop -->
+  <div class="backdrop" aria-hidden="true"></div>
+
   <header class="site-header">
     <img src="snapshot_icon_CORE.webp" alt="Snapshot logo" class="logo" />
   </header>
 
   <main>
-    <!-- ABSTRACT ART + START -->
+    <!-- HERO (kept simple; backdrop covers full page) -->
     <section class="hero" aria-labelledby="hero-title">
       <h1 id="hero-title" class="visually-hidden">Teamwork Survey</h1>
-
-      <!-- purely decorative background -->
-      <div class="hero-art" aria-hidden="true"></div>
-
       <button id="ctaBtn" class="cta">Start Survey</button>
     </section>
 
@@ -34,28 +33,26 @@
       novalidate
       aria-live="polite"
     >
-      <!-- Honeypot (spam trap). Keep empty. -->
       <input type="text" name="honeypot" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-      <!-- Steps wrapper (for animations & layout) -->
       <div id="steps" class="steps">
 
-        <!-- Q1 -->
-        <fieldset class="question card" data-step="0">
+        <!-- Q1 (unique animations 1) -->
+        <fieldset class="question card" data-step="0" data-in="in-roll-left" data-out="out-explode">
           <legend class="question-title">1. Do you think that Teamwork has a better workflow than Monday.com?</legend>
           <label class="option"><input type="radio" name="q1_workflow_better" value="Yes" required> Yes</label>
           <label class="option"><input type="radio" name="q1_workflow_better" value="No"> No</label>
         </fieldset>
 
-        <!-- Q2 -->
-        <fieldset class="question card" data-step="1">
+        <!-- Q2 (unique animations 2) -->
+        <fieldset class="question card" data-step="1" data-in="in-fade-down" data-out="out-hinge">
           <legend class="question-title">2. Do you think Teamwork has better usability than Monday.com? (yes or no)</legend>
           <label class="option"><input type="radio" name="q2_usability_better" value="Yes" required> Yes</label>
           <label class="option"><input type="radio" name="q2_usability_better" value="No"> No</label>
         </fieldset>
 
-        <!-- Q3 -->
-        <fieldset class="question card" data-step="2">
+        <!-- Q3 (unique animations 3) -->
+        <fieldset class="question card" data-step="2" data-in="in-skew-right" data-out="out-left-blur">
           <legend class="question-title">3. How do you feel overall about transitioning from Monday.com to Teamwork?</legend>
           <div class="scale">
             <label><input type="radio" name="q3_transition_feeling" value="1" required> 1</label>
@@ -66,8 +63,8 @@
           </div>
         </fieldset>
 
-        <!-- Q4 -->
-        <div class="question card" data-step="3">
+        <!-- Q4 (unique animations 4) -->
+        <div class="question card" data-step="3" data-in="in-pop" data-out="out-curtain-right">
           <label class="question-title" for="q4_open_feedback">
             4. Do you have any other questions, concerns, comments, thoughts, or anything else regarding your experience with Teamwork that you would like us to know?
           </label>
@@ -76,11 +73,10 @@
 
       </div>
 
-      <!-- Native submit kept for progressive enhancement; hidden until final step -->
       <button id="nativeSubmit" type="submit" class="visually-hidden">Submit</button>
     </form>
 
-    <!-- Floating progress button (Start → Next → Submit) -->
+    <!-- Floating Start → Next → Submit button (unchanged behavior) -->
     <button id="progressBtn" class="progress-btn" data-state="start" aria-live="polite">
       Start Survey
     </button>
