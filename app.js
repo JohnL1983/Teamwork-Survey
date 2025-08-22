@@ -9,8 +9,8 @@
   const heroEl = document.querySelector('.hero');
 
   const stages = Array.from(stepsWrap.querySelectorAll('.stage.question'));
-  let index = -1;                 // current stage index
-  let transitioning = false;      // prevent overlapping transitions
+  let index = -1;            // current stage index
+  let transitioning = false; // prevent overlapping transitions
 
   // ----- Viewport sizing (lock everything on-screen)
   function setViewportVars(){
@@ -25,42 +25,53 @@
   // Hide all stages initially
   stages.forEach(s => s.classList.remove('active'));
 
-  // Robust Animate.css runner that resolves even if no animationend fires
-  function playAnimation(el, name) {
+  // Remove any Animate.css classes to avoid conflicts
+  function clearAnimations(el){
+    const toRemove = [];
+    el.classList.forEach(c => { if (c.startsWith('animate__')) toRemove.push(c); });
+    if (toRemove.length) el.classList.remove(...toRemove);
+  }
+
+  // Apply Animate.css class and resolve; optional cleanup control
+  function playAnimation(el, name, opts = { cleanup: true }) {
+    const { cleanup } = opts;
+
     return new Promise(resolve => {
       const base = 'animate__animated';
       const full = `animate__${name}`;
       let done = false;
 
-      const clean = () => {
+      const finish = () => {
         if (done) return;
         done = true;
-        el.classList.remove(base, full);
+        if (cleanup) clearAnimations(el); // <- for IN animations
         el.removeEventListener('animationend', onEnd);
         clearTimeout(fallback);
         resolve();
       };
-      const onEnd = (e) => { if (e.target === el) clean(); };
 
-      // restart animation cleanly
-      el.classList.remove(base, full);
+      const onEnd = (e) => { if (e.target === el) finish(); };
+
+      // Fresh start each time
+      clearAnimations(el);
+      // reflow to restart
       void el.offsetWidth;
       el.classList.add(base, full);
       el.addEventListener('animationend', onEnd);
 
-      // Fallback duration based on computed styles (handles hinge/backIn/etc.)
+      // Fallback timing based on computed styles (duration × iterations + delay)
       const cs = getComputedStyle(el);
       const toMs = (v) => {
         if (!v) return 0;
-        const parts = v.split(',')[0].trim();
-        return parts.endsWith('ms') ? parseFloat(parts) : parseFloat(parts) * 1000;
+        const first = v.split(',')[0].trim();
+        return first.endsWith('ms') ? parseFloat(first) : parseFloat(first) * 1000;
       };
-      const dur = toMs(cs.animationDuration) || 650; // default if missing
+      const dur = toMs(cs.animationDuration) || 650;
       const delay = toMs(cs.animationDelay) || 0;
-      const iterStr = cs.animationIterationCount.split(',')[0].trim();
+      const iterStr = (cs.animationIterationCount || '1').split(',')[0].trim();
       const iters = (iterStr === 'infinite') ? 1 : (parseFloat(iterStr) || 1);
-      const total = (dur * iters) + delay + 150; // small buffer
-      const fallback = setTimeout(clean, total);
+      const total = (dur * iters) + delay + 150;
+      const fallback = setTimeout(finish, total);
     });
   }
 
@@ -68,16 +79,18 @@
     const stage = stages[i];
     if (!stage) return Promise.resolve();
     const inName = stage.dataset.in || 'fadeIn';
-    stage.classList.add('active');
-    return playAnimation(stage, inName);
+    stage.classList.add('active');        // make it visible
+    return playAnimation(stage, inName, { cleanup: true }); // cleanup after IN
   }
 
   async function hideStage(i) {
     const stage = stages[i];
     if (!stage) return;
     const outName = stage.dataset.out || 'fadeOut';
-    await playAnimation(stage, outName);
-    stage.classList.remove('active');
+    // Do NOT cleanup yet to avoid a "snap back" frame
+    await playAnimation(stage, outName, { cleanup: false });
+    stage.classList.remove('active');     // hide immediately after OUT completes
+    clearAnimations(stage);               // now safe to cleanup classes
   }
 
   // Start flow
@@ -85,7 +98,7 @@
     if (transitioning) return;
     transitioning = true;
 
-    // Collapse hero so the first stage sits directly under the header
+    // Collapse hero so the first stage is directly under the header
     heroEl?.classList.add('collapsed');
 
     // Reveal floating button
@@ -113,6 +126,7 @@
       progressBtn.disabled = true;
 
       const isLastIncoming = index + 1 === stages.length - 1;
+
       await hideStage(index);
       index = index + 1;
       await showStage(index);
@@ -133,6 +147,7 @@
       progressBtn.disabled = true;
 
       form.requestSubmit ? form.requestSubmit() : form.submit();
+
       setTimeout(() => {
         form.hidden = true;
         progressBtn.classList.remove('show');
