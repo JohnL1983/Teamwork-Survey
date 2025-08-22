@@ -11,26 +11,39 @@
 
   stages.forEach(s => s.classList.remove('active'));
 
-  // Helper to apply Animate.css classes and await the end
-  function playAnimation(el, name) {
-    return new Promise(resolve => {
-      const base = 'animate__animated';
-      const full = `animate__${name}`;
-      // reset previous run
-      el.classList.remove(base);
-      // force reflow so animation restarts
-      void el.offsetWidth;
-      el.classList.add(base, full);
+// Helper to apply Animate.css classes and resolve even if animationend never fires
+function playAnimation(el, name) {
+  return new Promise(resolve => {
+    const base = 'animate__animated';
+    const full = `animate__${name}`;
+    let done = false;
 
-      function onEnd(e){
-        if (e.target !== el) return;
-        el.classList.remove(base, full);
-        el.removeEventListener('animationend', onEnd);
-        resolve();
-      }
-      el.addEventListener('animationend', onEnd);
-    });
-  }
+    // cleanup helper
+    const finish = () => {
+      if (done) return;
+      done = true;
+      el.classList.remove(base, full);
+      el.removeEventListener('animationend', onEnd);
+      clearTimeout(fallback);
+      resolve();
+    };
+
+    const onEnd = (e) => { if (e.target === el) finish(); };
+
+    // restart animation
+    el.classList.remove(base, full);
+    void el.offsetWidth; // reflow
+    el.classList.add(base, full);
+    el.addEventListener('animationend', onEnd);
+
+    // Fallback: resolve after --animate-duration (default .65s) + a small buffer
+    const root = getComputedStyle(document.documentElement);
+    const durStr = (root.getPropertyValue('--animate-duration') || '.65s').trim();
+    const ms = durStr.endsWith('ms') ? parseFloat(durStr) : parseFloat(durStr) * 1000;
+    const fallback = setTimeout(finish, Math.max(200, ms + 150));
+  });
+}
+
 
   function showStage(i) {
     const stage = stages[i];
