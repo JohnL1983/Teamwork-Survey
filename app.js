@@ -6,27 +6,28 @@
   const form = document.getElementById('surveyForm');
   const thankYou = document.getElementById('thankYou');
 
+  // NEW: header + hero refs for viewport sizing and collapsing the hero
+  const headerEl = document.querySelector('.site-header');
+  const heroEl = document.querySelector('.hero');
+
   const stages = Array.from(stepsWrap.querySelectorAll('.stage.question'));
   let index = -1; // not started
 
+  // --- Viewport sizing (mobile-safe) -> used by CSS clamps
+  function setViewportVars(){
+    const vh = window.innerHeight * 0.01; // 1% of viewport height
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    const hh = headerEl?.offsetHeight || 0;
+    document.documentElement.style.setProperty('--header-h', `${hh}px`);
+  }
+  setViewportVars();
+  window.addEventListener('resize', setViewportVars);
+
+  // Initial state
   stages.forEach(s => s.classList.remove('active'));
 
   // Helper: get the card inside a stage (fallback to stage if missing)
   const getCard = (stage) => stage.querySelector('.card') || stage;
-
-  // --- Viewport sizing vars (mobile-safe) ---
-const headerEl = document.querySelector('.site-header');
-const heroEl = document.querySelector('.hero');
-
-function setViewportVars(){
-  const vh = window.innerHeight * 0.01;
-  document.documentElement.style.setProperty('--vh', `${vh}px`);
-  const hh = headerEl?.offsetHeight || 0;
-  document.documentElement.style.setProperty('--header-h', `${hh}px`);
-}
-setViewportVars();
-window.addEventListener('resize', setViewportVars);
-
 
   // Helper to apply Animate.css classes and resolve even if animationend never fires
   function playAnimation(el, name) {
@@ -80,20 +81,24 @@ window.addEventListener('resize', setViewportVars);
     stage.classList.remove('active');             // then hide the stage
   }
 
-ctaBtn.addEventListener('click', async () => {
-  ctaBtn.classList.add('dock');
-  progressBtn.classList.add('show');
-  progressBtn.textContent = 'Next';
-  progressBtn.dataset.state = 'next';
+  // Start flow
+  ctaBtn.addEventListener('click', async () => {
+    // Show floating button
+    ctaBtn.classList.add('dock');
+    progressBtn.classList.add('show');
+    progressBtn.textContent = 'Next';
+    progressBtn.dataset.state = 'next';
 
-  // NEW: collapse hero so the stage fills the viewport under the header
-  if (heroEl) heroEl.style.display = 'none';
+    // NEW: collapse hero so the first stage sits directly under the header
+    if (heroEl) heroEl.style.display = 'none';
 
-  index = 0;
-  await showStage(index);
-  focusCurrentTitle();
-});
+    // Ensure viewport vars are current (in case header height changed)
+    setViewportVars();
 
+    index = 0;
+    await showStage(index);
+    focusCurrentTitle();
+  });
 
   // Next / Submit
   progressBtn.addEventListener('click', async () => {
