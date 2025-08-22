@@ -5,66 +5,60 @@
   const stepsWrap = document.getElementById('steps');
   const form = document.getElementById('surveyForm');
   const thankYou = document.getElementById('thankYou');
-  const headerEl = document.querySelector('.site-header');
 
   const stages = Array.from(stepsWrap.querySelectorAll('.stage.question'));
   let index = -1; // not started
 
-  // ----- Viewport sizing: lock everything on-screen (no page scroll)
-  function setViewportVars(){
-    // Mobile-safe 1% viewport height
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-
-    // Exact header height
-    const hh = headerEl?.offsetHeight || 0;
-    document.documentElement.style.setProperty('--header-h', `${hh}px`);
-  }
-  setViewportVars();
-  window.addEventListener('resize', setViewportVars);
-
   stages.forEach(s => s.classList.remove('active'));
 
-  // Helper to apply Animate.css classes and resolve even if animationend never fires
-  function playAnimation(el, name) {
-    return new Promise(resolve => {
-      const base = 'animate__animated';
-      const full = `animate__${name}`;
-      let done = false;
+// Helper to apply Animate.css classes and resolve even if animationend never fires
+function playAnimation(el, name) {
+  return new Promise(resolve => {
+    const base = 'animate__animated';
+    const full = `animate__${name}`;
+    let done = false;
 
-      const finish = () => {
-        if (done) return;
-        done = true;
-        el.classList.remove(base, full);
-        el.removeEventListener('animationend', onEnd);
-        clearTimeout(fallback);
-        resolve();
-      };
-      const onEnd = (e) => { if (e.target === el) finish(); };
-
+    // cleanup helper
+    const finish = () => {
+      if (done) return;
+      done = true;
       el.classList.remove(base, full);
-      void el.offsetWidth;
-      el.classList.add(base, full);
-      el.addEventListener('animationend', onEnd);
+      el.removeEventListener('animationend', onEnd);
+      clearTimeout(fallback);
+      resolve();
+    };
 
-      const root = getComputedStyle(document.documentElement);
-      const durStr = (root.getPropertyValue('--animate-duration') || '.65s').trim();
-      const ms = durStr.endsWith('ms') ? parseFloat(durStr) : parseFloat(durStr) * 1000;
-      const fallback = setTimeout(finish, Math.max(200, ms + 150));
-    });
-  }
+    const onEnd = (e) => { if (e.target === el) finish(); };
+
+    // restart animation
+    el.classList.remove(base, full);
+    void el.offsetWidth; // reflow
+    el.classList.add(base, full);
+    el.addEventListener('animationend', onEnd);
+
+    // Fallback: resolve after --animate-duration (default .65s) + a small buffer
+    const root = getComputedStyle(document.documentElement);
+    const durStr = (root.getPropertyValue('--animate-duration') || '.65s').trim();
+    const ms = durStr.endsWith('ms') ? parseFloat(durStr) : parseFloat(durStr) * 1000;
+    const fallback = setTimeout(finish, Math.max(200, ms + 150));
+  });
+}
+
 
   function showStage(i) {
     const stage = stages[i];
-    if (!stage) return Promise.resolve();
+    if (!stage) return;
+
     const inName = stage.dataset.in || 'fadeIn';
     stage.classList.add('active');
+    // Animate the full-screen stage; the card sits centered
     return playAnimation(stage, inName);
   }
 
   async function hideStage(i) {
     const stage = stages[i];
     if (!stage) return;
+
     const outName = stage.dataset.out || 'fadeOut';
     await playAnimation(stage, outName);
     stage.classList.remove('active');
@@ -87,10 +81,12 @@
 
     if (state === 'next') {
       if (!validateCurrent()) return;
+
       const isLastIncoming = index + 1 === stages.length - 1;
       await hideStage(index);
       index = index + 1;
       await showStage(index);
+
       if (isLastIncoming) {
         progressBtn.dataset.state = 'submit';
         progressBtn.textContent = 'Submit';
