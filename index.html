@@ -6,13 +6,13 @@
   <title>Teamwork Survey</title>
   <link rel="stylesheet" href="style.css">
   <!-- Animate.css -->
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-  integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-/>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
 </head>
 <body>
   <!-- Static full-viewport spray image (save your generated image as backdrop.png) -->
@@ -58,6 +58,12 @@
             </legend>
             <label class="option"><input type="radio" name="q1_workflow_better" value="Yes" required> Yes</label>
             <label class="option"><input type="radio" name="q1_workflow_better" value="No"> No</label>
+
+            <!-- Q1 comments (optional) -->
+            <div class="comments-block" style="margin-top:12px;">
+              <label for="q1_comments">Comments (optional)</label>
+              <textarea id="q1_comments" name="q1_comments" rows="3" maxlength="2000" placeholder="Add any context or details..."></textarea>
+            </div>
           </fieldset>
         </section>
 
@@ -70,6 +76,12 @@
             </legend>
             <label class="option"><input type="radio" name="q2_usability_better" value="Yes" required> Yes</label>
             <label class="option"><input type="radio" name="q2_usability_better" value="No"> No</label>
+
+            <!-- Q2 comments (optional) -->
+            <div class="comments-block" style="margin-top:12px;">
+              <label for="q2_comments">Comments (optional)</label>
+              <textarea id="q2_comments" name="q2_comments" rows="3" maxlength="2000" placeholder="Add any context or details..."></textarea>
+            </div>
           </fieldset>
         </section>
 
@@ -86,6 +98,12 @@
               <label><input type="radio" name="q3_transition_feeling" value="3"> 3</label>
               <label><input type="radio" name="q3_transition_feeling" value="4"> 4</label>
               <label><input type="radio" name="q3_transition_feeling" value="5"> 5</label>
+            </div>
+
+            <!-- Q3 comments (optional) -->
+            <div class="comments-block" style="margin-top:12px;">
+              <label for="q3_comments">Comments (optional)</label>
+              <textarea id="q3_comments" name="q3_comments" rows="3" maxlength="2000" placeholder="Add any context or details..."></textarea>
             </div>
           </fieldset>
         </section>

@@ -1,4 +1,4 @@
-// Survey stepper using Animate.css for full-screen stage transitions
+// Survey stepper using Animate.css — animate the CARD (not the full stage)
 (function () {
   const ctaBtn = document.getElementById('ctaBtn');
   const progressBtn = document.getElementById('progressBtn');
@@ -11,48 +11,49 @@
 
   stages.forEach(s => s.classList.remove('active'));
 
-// Helper to apply Animate.css classes and resolve even if animationend never fires
-function playAnimation(el, name) {
-  return new Promise(resolve => {
-    const base = 'animate__animated';
-    const full = `animate__${name}`;
-    let done = false;
+  // Helper: get the card inside a stage (fallback to stage if missing)
+  const getCard = (stage) => stage.querySelector('.card') || stage;
 
-    // cleanup helper
-    const finish = () => {
-      if (done) return;
-      done = true;
+  // Helper to apply Animate.css classes and resolve even if animationend never fires
+  function playAnimation(el, name) {
+    return new Promise(resolve => {
+      const base = 'animate__animated';
+      const full = `animate__${name}`;
+      let done = false;
+
+      const finish = () => {
+        if (done) return;
+        done = true;
+        el.classList.remove(base, full);
+        el.removeEventListener('animationend', onEnd);
+        clearTimeout(fallback);
+        resolve();
+      };
+
+      const onEnd = (e) => { if (e.target === el) finish(); };
+
+      // restart animation cleanly
       el.classList.remove(base, full);
-      el.removeEventListener('animationend', onEnd);
-      clearTimeout(fallback);
-      resolve();
-    };
+      void el.offsetWidth; // reflow
+      el.classList.add(base, full);
+      el.addEventListener('animationend', onEnd);
 
-    const onEnd = (e) => { if (e.target === el) finish(); };
-
-    // restart animation
-    el.classList.remove(base, full);
-    void el.offsetWidth; // reflow
-    el.classList.add(base, full);
-    el.addEventListener('animationend', onEnd);
-
-    // Fallback: resolve after --animate-duration (default .65s) + a small buffer
-    const root = getComputedStyle(document.documentElement);
-    const durStr = (root.getPropertyValue('--animate-duration') || '.65s').trim();
-    const ms = durStr.endsWith('ms') ? parseFloat(durStr) : parseFloat(durStr) * 1000;
-    const fallback = setTimeout(finish, Math.max(200, ms + 150));
-  });
-}
-
+      // Fallback: resolve after --animate-duration (default .65s) + a small buffer
+      const root = getComputedStyle(document.documentElement);
+      const durStr = (root.getPropertyValue('--animate-duration') || '.65s').trim();
+      const ms = durStr.endsWith('ms') ? parseFloat(durStr) : parseFloat(durStr) * 1000;
+      const fallback = setTimeout(finish, Math.max(200, ms + 150));
+    });
+  }
 
   function showStage(i) {
     const stage = stages[i];
     if (!stage) return;
 
     const inName = stage.dataset.in || 'fadeIn';
-    stage.classList.add('active');
-    // Animate the full-screen stage; the card sits centered
-    return playAnimation(stage, inName);
+    stage.classList.add('active');                // reveal the stage
+    const card = getCard(stage);
+    return playAnimation(card, inName);           // animate the CARD in
   }
 
   async function hideStage(i) {
@@ -60,8 +61,9 @@ function playAnimation(el, name) {
     if (!stage) return;
 
     const outName = stage.dataset.out || 'fadeOut';
-    await playAnimation(stage, outName);
-    stage.classList.remove('active');
+    const card = getCard(stage);
+    await playAnimation(card, outName);           // animate the CARD out
+    stage.classList.remove('active');             // then hide the stage
   }
 
   // Start flow
