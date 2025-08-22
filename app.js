@@ -14,6 +14,20 @@
   // Helper: get the card inside a stage (fallback to stage if missing)
   const getCard = (stage) => stage.querySelector('.card') || stage;
 
+  // --- Viewport sizing vars (mobile-safe) ---
+const headerEl = document.querySelector('.site-header');
+const heroEl = document.querySelector('.hero');
+
+function setViewportVars(){
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+  const hh = headerEl?.offsetHeight || 0;
+  document.documentElement.style.setProperty('--header-h', `${hh}px`);
+}
+setViewportVars();
+window.addEventListener('resize', setViewportVars);
+
+
   // Helper to apply Animate.css classes and resolve even if animationend never fires
   function playAnimation(el, name) {
     return new Promise(resolve => {
@@ -66,16 +80,20 @@
     stage.classList.remove('active');             // then hide the stage
   }
 
-  // Start flow
-  ctaBtn.addEventListener('click', async () => {
-    ctaBtn.classList.add('dock');
-    progressBtn.classList.add('show');
-    progressBtn.textContent = 'Next';
-    progressBtn.dataset.state = 'next';
-    index = 0;
-    await showStage(index);
-    focusCurrentTitle();
-  });
+ctaBtn.addEventListener('click', async () => {
+  ctaBtn.classList.add('dock');
+  progressBtn.classList.add('show');
+  progressBtn.textContent = 'Next';
+  progressBtn.dataset.state = 'next';
+
+  // NEW: collapse hero so the stage fills the viewport under the header
+  if (heroEl) heroEl.style.display = 'none';
+
+  index = 0;
+  await showStage(index);
+  focusCurrentTitle();
+});
+
 
   // Next / Submit
   progressBtn.addEventListener('click', async () => {
