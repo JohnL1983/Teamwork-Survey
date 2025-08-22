@@ -1,108 +1,121 @@
-// Clean, serialized stepper with Animate.css (no page scroll, static backdrop)
+// Survey stepper using Animate.css for full-screen stage transitions
 (function () {
-  const $ = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const ctaBtn = document.getElementById('ctaBtn');
+  const progressBtn = document.getElementById('progressBtn');
+  const stepsWrap = document.getElementById('steps');
+  const form = document.getElementById('surveyForm');
+  const thankYou = document.getElementById('thankYou');
 
-  const headerEl = $('.site-header');
-  const heroEl = $('#hero');
-  const ctaBtn = $('#ctaBtn');
-  const progressBtn = $('#progressBtn');
-  const form = $('#surveyForm');
-  const stepsWrap = $('#steps');
-  const thankYou = $('#thankYou');
+  const stages = Array.from(stepsWrap.querySelectorAll('.stage.question'));
+  let index = -1; // not started
 
-  const stages = $$('.stage.question', stepsWrap);
+  stages.forEach(s => s.classList.remove('active'));
 
-  let index = -1;            // current stage index
-  let transitioning = false; // serialize transitions
+// Helper to apply Animate.css classes and resolve even if animationend never fires
+function playAnimation(el, name) {
+  return new Promise(resolve => {
+    const base = 'animate__animated';
+    const full = `animate__${name}`;
+    let done = false;
 
-  // ----- Sizing: compute safe viewport + header height
-  function setViewportVars(){
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-    const hh = headerEl?.getBoundingClientRect().height || 0;
-    document.documentElement.style.setProperty('--header-h', `${Math.round(hh)}px`);
-  }
-  setViewportVars();
-  window.addEventListener('resize', setViewportVars);
+    // cleanup helper
+    const finish = () => {
+      if (done) return;
+      done = true;
+      el.classList.remove(base, full);
+      el.removeEventListener('animationend', onEnd);
+      clearTimeout(fallback);
+      resolve();
+    };
 
-  // Helper: remove any lingering animate.css classes
-  function clearAnimateClasses(el){
-    const toRemove = [];
-    el.classList.forEach(c => { if (c.startsWith('animate__')) toRemove.push(c); });
-    if (toRemove.length) el.classList.remove(...toRemove);
-  }
+    const onEnd = (e) => { if (e.target === el) finish(); };
 
-  // Play an Animate.css animation; resolve even if animationend is missed
-  function animate(el, name, {cleanup=true} = {}){
-    return new Promise(resolve => {
-      // If animate.css failed to load, just resolve quickly
-      const ADD = 'animate__animated';
-      const FULL = `animate__${name}`;
-      let done = false;
+    // restart animation
+    el.classList.remove(base, full);
+    void el.offsetWidth; // reflow
+    el.classList.add(base, full);
+    el.addEventListener('animationend', onEnd);
 
-      const finish = () => {
-        if (done) return;
-        done = true;
-        if (cleanup) clearAnimateClasses(el);
-        el.removeEventListener('animationend', onEnd);
-        clearTimeout(fallback);
-        resolve();
-      };
-      const onEnd = (e) => { if (e.target === el) finish(); };
+    // Fallback: resolve after --animate-duration (default .65s) + a small buffer
+    const root = getComputedStyle(document.documentElement);
+    const durStr = (root.getPropertyValue('--animate-duration') || '.65s').trim();
+    const ms = durStr.endsWith('ms') ? parseFloat(durStr) : parseFloat(durStr) * 1000;
+    const fallback = setTimeout(finish, Math.max(200, ms + 150));
+  });
+}
 
-      clearAnimateClasses(el);
-      void el.offsetWidth;            // restart
-      el.classList.add(ADD, FULL);
-      el.addEventListener('animationend', onEnd);
 
-      // Fallback based on computed animation duration
-      const cs = getComputedStyle(el);
-      const toMs = v => {
-        if (!v) return 0;
-        const first = v.split(',')[0].trim();
-        return first.endsWith('ms') ? parseFloat(first) : parseFloat(first) * 1000;
-      };
-      const dur = toMs(cs.animationDuration) || 650;
-      const delay = toMs(cs.animationDelay) || 0;
-      const itersRaw = (cs.animationIterationCount || '1').split(',')[0].trim();
-      const iters = itersRaw === 'infinite' ? 1 : (parseFloat(itersRaw) || 1);
-      const total = (dur * iters) + delay + 150;
-      const fallback = setTimeout(finish, total);
-    });
-  }
-
-  // Show a stage (unhide, play IN)
-  function showStage(i){
-    const stage = stages[i];
-    if (!stage) return Promise.resolve();
-    stage.hidden = false;                            // participate in layout
-    const inName = stage.dataset.in || 'fadeIn';
-    return animate(stage, inName, {cleanup:true});   // cleanup IN classes after
-  }
-
-  // Hide a stage (play OUT, then hide and cleanup)
-  async function hideStage(i){
+  function showStage(i) {
     const stage = stages[i];
     if (!stage) return;
-    const outName = stage.dataset.out || 'fadeOut';
-    await animate(stage, outName, {cleanup:false});  // don't clear yet
-    stage.hidden = true;                             // remove from layout (prevents "pop back")
-    clearAnimateClasses(stage);                      // now safe to cleanup
+
+    const inName = stage.dataset.in || 'fadeIn';
+    stage.classList.add('active');
+    // Animate the full-screen stage; the card sits centered
+    return playAnimation(stage, inName);
   }
 
-  // Validation for current stage only
-  function validateCurrent(){
+  async function hideStage(i) {
+    const stage = stages[i];
+    if (!stage) return;
+
+    const outName = stage.dataset.out || 'fadeOut';
+    await playAnimation(stage, outName);
+    stage.classList.remove('active');
+  }
+
+  // Start flow
+  ctaBtn.addEventListener('click', async () => {
+    ctaBtn.classList.add('dock');
+    progressBtn.classList.add('show');
+    progressBtn.textContent = 'Next';
+    progressBtn.dataset.state = 'next';
+    index = 0;
+    await showStage(index);
+    focusCurrentTitle();
+  });
+
+  // Next / Submit
+  progressBtn.addEventListener('click', async () => {
+    const state = progressBtn.dataset.state;
+
+    if (state === 'next') {
+      if (!validateCurrent()) return;
+
+      const isLastIncoming = index + 1 === stages.length - 1;
+      await hideStage(index);
+      index = index + 1;
+      await showStage(index);
+
+      if (isLastIncoming) {
+        progressBtn.dataset.state = 'submit';
+        progressBtn.textContent = 'Submit';
+      }
+      focusCurrentTitle();
+    } else if (state === 'submit') {
+      if (!validateCurrent()) return;
+      form.requestSubmit ? form.requestSubmit() : form.submit();
+      progressBtn.disabled = true;
+      setTimeout(() => {
+        form.hidden = true;
+        progressBtn.classList.remove('show');
+        thankYou.hidden = false;
+      }, 300);
+    }
+  });
+
+  // Validation limited to current stage
+  function validateCurrent() {
     const stage = stages[index];
     if (!stage) return true;
 
     const radios = stage.querySelectorAll('input[type="radio"]');
-    if (radios.length){
+    if (radios.length) {
       const names = [...new Set([...radios].map(r => r.name))];
-      for (const name of names){
+      for (const name of names) {
         const group = stage.querySelectorAll(`input[type="radio"][name="${name}"]`);
         const checked = [...group].some(r => r.checked);
-        if (!checked){
+        if (!checked) {
           pulse(stage.querySelector('.card') || stage);
           group[0].focus();
           return false;
@@ -112,8 +125,8 @@
     }
 
     const fields = stage.querySelectorAll('textarea[required], input[required], select[required]');
-    for (const el of fields){
-      if (!el.value.trim()){
+    for (const el of fields) {
+      if (!el.value.trim()) {
         pulse(stage.querySelector('.card') || stage);
         el.focus();
         return false;
@@ -127,75 +140,14 @@
     setTimeout(() => { el.style.boxShadow = ''; }, 350);
   }
 
-  function focusTitle(){
+  function focusCurrentTitle(){
     const title = stages[index]?.querySelector('.question-title, legend');
-    if (title){
+    if (title) {
       title.setAttribute('tabindex','-1');
       title.focus({preventScroll:true});
       setTimeout(()=> title.removeAttribute('tabindex'), 0);
     }
   }
 
-  // Start flow
-  ctaBtn.addEventListener('click', async () => {
-    if (transitioning) return;
-    transitioning = true;
-
-    // Hide hero fully; reveal progress button
-    heroEl.hidden = true;
-    progressBtn.hidden = false;
-    progressBtn.dataset.state = 'next';
-    progressBtn.textContent = 'Next';
-
-    index = 0;
-    await showStage(index);
-
-    transitioning = false;
-    focusTitle();
-  });
-
-  // Next / Submit
-  progressBtn.addEventListener('click', async () => {
-    if (transitioning) return;
-    const state = progressBtn.dataset.state;
-
-    if (state === 'next'){
-      if (!validateCurrent()) return;
-
-      transitioning = true;
-      progressBtn.disabled = true;
-
-      const isLastIncoming = (index + 1 === stages.length - 1);
-
-      await hideStage(index);
-      index = index + 1;
-      await showStage(index);
-
-      if (isLastIncoming){
-        progressBtn.dataset.state = 'submit';
-        progressBtn.textContent = 'Submit';
-      }
-
-      progressBtn.disabled = false;
-      transitioning = false;
-      focusTitle();
-    }
-    else if (state === 'submit'){
-      if (!validateCurrent()) return;
-
-      transitioning = true;
-      progressBtn.disabled = true;
-
-      form.requestSubmit ? form.requestSubmit() : form.submit();
-      setTimeout(() => {
-        stepsWrap.hidden = true;
-        progressBtn.hidden = true;
-        thankYou.hidden = false;
-        transitioning = false;
-      }, 300);
-    }
-  });
-
-  // Progressive enhancement flag
   document.documentElement.classList.add('js');
 })();
