@@ -5,17 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Teamwork Survey</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Animate.css -->
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-  integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-/>
+
+  <!-- Animate.css (correct SRI) -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
 </head>
 <body>
-  <!-- Static full-viewport spray image (save your generated image as backdrop.png) -->
+  <!-- Static backdrop image + adjustable overlay -->
   <div class="backdrop" aria-hidden="true"></div>
 
   <header class="site-header">
@@ -23,8 +24,8 @@
   </header>
 
   <main>
-    <!-- HERO (CTA; background remains static) -->
-    <section class="hero" aria-labelledby="hero-title">
+    <!-- HERO -->
+    <section class="hero" id="hero" aria-labelledby="hero-title">
       <h1 id="hero-title" class="visually-hidden">Teamwork Survey</h1>
       <button id="ctaBtn" class="cta">Start Survey</button>
     </section>
@@ -32,7 +33,7 @@
     <!-- Hidden iframe to receive the response -->
     <iframe name="hidden_iframe" id="hidden_iframe" title="submission target" class="visually-hidden"></iframe>
 
-    <!-- Survey -->
+    <!-- SURVEY -->
     <form
       id="surveyForm"
       action="https://script.google.com/macros/s/AKfycbzwxnFF3-3wHcDUhCh0rRgwh0RgEZDHX04KoYrejHt9FndvfhS-108B1v2MVwbj7RLm/exec"
@@ -44,14 +45,9 @@
       <input type="text" name="honeypot" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
       <div id="steps" class="steps">
-        <!--
-          Each .stage is full-viewport (minus header), and owns the Animate.css in/out.
-          Put the question UI inside .card so content stays readable.
-        -->
 
-        <!-- Q1 -->
-        <section class="stage question" data-step="0"
-                 data-in="rollIn" data-out="zoomOut">
+        <!-- Stage 0 -->
+        <section class="stage question" data-step="0" data-in="rollIn" data-out="zoomOut" hidden>
           <fieldset class="card">
             <legend class="question-title">
               1. Do you think that Teamwork has a better workflow than Monday.com?
@@ -61,9 +57,8 @@
           </fieldset>
         </section>
 
-        <!-- Q2 -->
-        <section class="stage question" data-step="1"
-                 data-in="fadeInDownBig" data-out="hinge">
+        <!-- Stage 1 -->
+        <section class="stage question" data-step="1" data-in="fadeInDownBig" data-out="hinge" hidden>
           <fieldset class="card">
             <legend class="question-title">
               2. Do you think Teamwork has better usability than Monday.com? (yes or no)
@@ -73,9 +68,8 @@
           </fieldset>
         </section>
 
-        <!-- Q3 -->
-        <section class="stage question" data-step="2"
-                 data-in="lightSpeedInRight" data-out="slideOutLeft">
+        <!-- Stage 2 -->
+        <section class="stage question" data-step="2" data-in="lightSpeedInRight" data-out="slideOutLeft" hidden>
           <fieldset class="card">
             <legend class="question-title">
               3. How do you feel overall about transitioning from Monday.com to Teamwork?
@@ -90,9 +84,8 @@
           </fieldset>
         </section>
 
-        <!-- Q4 -->
-        <section class="stage question" data-step="3"
-                 data-in="backInUp" data-out="rotateOutDownRight">
+        <!-- Stage 3 -->
+        <section class="stage question" data-step="3" data-in="backInUp" data-out="rotateOutDownRight" hidden>
           <div class="card">
             <label class="question-title" for="q4_open_feedback">
               4. Do you have any other questions, concerns, comments, thoughts, or anything else regarding your experience with Teamwork that you would like us to know?
@@ -100,20 +93,21 @@
             <textarea id="q4_open_feedback" name="q4_open_feedback" rows="5" maxlength="2000" required></textarea>
           </div>
         </section>
+
       </div>
 
       <button id="nativeSubmit" type="submit" class="visually-hidden">Submit</button>
     </form>
 
-    <!-- Floating Start → Next → Submit button -->
-    <button id="progressBtn" class="progress-btn" data-state="start" aria-live="polite">
+    <!-- Floating Start → Next → Submit -->
+    <button id="progressBtn" class="progress-btn" data-state="start" aria-live="polite" hidden>
       Start Survey
     </button>
 
-    <div id="thankYou" class="thankyou" hidden>
+    <section id="thankYou" class="thankyou" hidden>
       <h2>Thank you for completing the survey!</h2>
       <p>Your responses were submitted successfully.</p>
-    </div>
+    </section>
   </main>
 
   <script src="app.js" defer></script>
