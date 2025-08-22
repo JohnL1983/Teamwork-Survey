@@ -5,9 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Teamwork Survey</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Animate.css -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    integrity="sha512-b7nQv0qvM5fQ0kqg1pF5l1n7y2kQnM1YF1b9f3q0n7rK8y3mYy1nQ4m0b1pQ3m2Xb8m0y3m1q4n2k5T0R6jv0Q=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
 </head>
 <body>
-  <!-- Full-viewport abstract art backdrop -->
+  <!-- Static full-viewport spray image (save your generated image as backdrop.png) -->
   <div class="backdrop" aria-hidden="true"></div>
 
   <header class="site-header">
@@ -15,7 +23,7 @@
   </header>
 
   <main>
-    <!-- HERO (kept simple; backdrop covers full page) -->
+    <!-- HERO (CTA; background remains static) -->
     <section class="hero" aria-labelledby="hero-title">
       <h1 id="hero-title" class="visually-hidden">Teamwork Survey</h1>
       <button id="ctaBtn" class="cta">Start Survey</button>
@@ -36,47 +44,68 @@
       <input type="text" name="honeypot" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
       <div id="steps" class="steps">
+        <!--
+          Each .stage is full-viewport (minus header), and owns the Animate.css in/out.
+          Put the question UI inside .card so content stays readable.
+        -->
 
-        <!-- Q1 (unique animations 1) -->
-        <fieldset class="question card" data-step="0" data-in="in-roll-left" data-out="out-explode">
-          <legend class="question-title">1. Do you think that Teamwork has a better workflow than Monday.com?</legend>
-          <label class="option"><input type="radio" name="q1_workflow_better" value="Yes" required> Yes</label>
-          <label class="option"><input type="radio" name="q1_workflow_better" value="No"> No</label>
-        </fieldset>
+        <!-- Q1 -->
+        <section class="stage question" data-step="0"
+                 data-in="rollIn" data-out="zoomOut">
+          <fieldset class="card">
+            <legend class="question-title">
+              1. Do you think that Teamwork has a better workflow than Monday.com?
+            </legend>
+            <label class="option"><input type="radio" name="q1_workflow_better" value="Yes" required> Yes</label>
+            <label class="option"><input type="radio" name="q1_workflow_better" value="No"> No</label>
+          </fieldset>
+        </section>
 
-        <!-- Q2 (unique animations 2) -->
-        <fieldset class="question card" data-step="1" data-in="in-fade-down" data-out="out-hinge">
-          <legend class="question-title">2. Do you think Teamwork has better usability than Monday.com? (yes or no)</legend>
-          <label class="option"><input type="radio" name="q2_usability_better" value="Yes" required> Yes</label>
-          <label class="option"><input type="radio" name="q2_usability_better" value="No"> No</label>
-        </fieldset>
+        <!-- Q2 -->
+        <section class="stage question" data-step="1"
+                 data-in="fadeInDownBig" data-out="hinge">
+          <fieldset class="card">
+            <legend class="question-title">
+              2. Do you think Teamwork has better usability than Monday.com? (yes or no)
+            </legend>
+            <label class="option"><input type="radio" name="q2_usability_better" value="Yes" required> Yes</label>
+            <label class="option"><input type="radio" name="q2_usability_better" value="No"> No</label>
+          </fieldset>
+        </section>
 
-        <!-- Q3 (unique animations 3) -->
-        <fieldset class="question card" data-step="2" data-in="in-skew-right" data-out="out-left-blur">
-          <legend class="question-title">3. How do you feel overall about transitioning from Monday.com to Teamwork?</legend>
-          <div class="scale">
-            <label><input type="radio" name="q3_transition_feeling" value="1" required> 1</label>
-            <label><input type="radio" name="q3_transition_feeling" value="2"> 2</label>
-            <label><input type="radio" name="q3_transition_feeling" value="3"> 3</label>
-            <label><input type="radio" name="q3_transition_feeling" value="4"> 4</label>
-            <label><input type="radio" name="q3_transition_feeling" value="5"> 5</label>
+        <!-- Q3 -->
+        <section class="stage question" data-step="2"
+                 data-in="lightSpeedInRight" data-out="slideOutLeft">
+          <fieldset class="card">
+            <legend class="question-title">
+              3. How do you feel overall about transitioning from Monday.com to Teamwork?
+            </legend>
+            <div class="scale">
+              <label><input type="radio" name="q3_transition_feeling" value="1" required> 1</label>
+              <label><input type="radio" name="q3_transition_feeling" value="2"> 2</label>
+              <label><input type="radio" name="q3_transition_feeling" value="3"> 3</label>
+              <label><input type="radio" name="q3_transition_feeling" value="4"> 4</label>
+              <label><input type="radio" name="q3_transition_feeling" value="5"> 5</label>
+            </div>
+          </fieldset>
+        </section>
+
+        <!-- Q4 -->
+        <section class="stage question" data-step="3"
+                 data-in="backInUp" data-out="rotateOutDownRight">
+          <div class="card">
+            <label class="question-title" for="q4_open_feedback">
+              4. Do you have any other questions, concerns, comments, thoughts, or anything else regarding your experience with Teamwork that you would like us to know?
+            </label>
+            <textarea id="q4_open_feedback" name="q4_open_feedback" rows="5" maxlength="2000" required></textarea>
           </div>
-        </fieldset>
-
-        <!-- Q4 (unique animations 4) -->
-        <div class="question card" data-step="3" data-in="in-pop" data-out="out-curtain-right">
-          <label class="question-title" for="q4_open_feedback">
-            4. Do you have any other questions, concerns, comments, thoughts, or anything else regarding your experience with Teamwork that you would like us to know?
-          </label>
-          <textarea id="q4_open_feedback" name="q4_open_feedback" rows="5" maxlength="2000" required></textarea>
-        </div>
-
+        </section>
       </div>
 
       <button id="nativeSubmit" type="submit" class="visually-hidden">Submit</button>
     </form>
 
-    <!-- Floating Start → Next → Submit button (unchanged behavior) -->
+    <!-- Floating Start → Next → Submit button -->
     <button id="progressBtn" class="progress-btn" data-state="start" aria-live="polite">
       Start Survey
     </button>

@@ -1,4 +1,4 @@
-// Animated survey with unique per-question in/out motions + full-viewport backdrop
+// Survey stepper using Animate.css for full-screen stage transitions
 (function () {
   const ctaBtn = document.getElementById('ctaBtn');
   const progressBtn = document.getElementById('progressBtn');
@@ -6,36 +6,79 @@
   const form = document.getElementById('surveyForm');
   const thankYou = document.getElementById('thankYou');
 
-  const questions = Array.from(stepsWrap.querySelectorAll('.question'));
+  const stages = Array.from(stepsWrap.querySelectorAll('.stage.question'));
   let index = -1; // not started
 
-  // Initial visibility
-  questions.forEach(q => q.classList.remove('active'));
+  stages.forEach(s => s.classList.remove('active'));
 
-  // Start from CTA
-  ctaBtn.addEventListener('click', () => {
+  // Helper to apply Animate.css classes and await the end
+  function playAnimation(el, name) {
+    return new Promise(resolve => {
+      const base = 'animate__animated';
+      const full = `animate__${name}`;
+      // reset previous run
+      el.classList.remove(base);
+      // force reflow so animation restarts
+      void el.offsetWidth;
+      el.classList.add(base, full);
+
+      function onEnd(e){
+        if (e.target !== el) return;
+        el.classList.remove(base, full);
+        el.removeEventListener('animationend', onEnd);
+        resolve();
+      }
+      el.addEventListener('animationend', onEnd);
+    });
+  }
+
+  function showStage(i) {
+    const stage = stages[i];
+    if (!stage) return;
+
+    const inName = stage.dataset.in || 'fadeIn';
+    stage.classList.add('active');
+    // Animate the full-screen stage; the card sits centered
+    return playAnimation(stage, inName);
+  }
+
+  async function hideStage(i) {
+    const stage = stages[i];
+    if (!stage) return;
+
+    const outName = stage.dataset.out || 'fadeOut';
+    await playAnimation(stage, outName);
+    stage.classList.remove('active');
+  }
+
+  // Start flow
+  ctaBtn.addEventListener('click', async () => {
     ctaBtn.classList.add('dock');
     progressBtn.classList.add('show');
     progressBtn.textContent = 'Next';
     progressBtn.dataset.state = 'next';
-    goTo(0); // first question
+    index = 0;
+    await showStage(index);
     focusCurrentTitle();
   });
 
-  // Next/Submit button
-  progressBtn.addEventListener('click', () => {
+  // Next / Submit
+  progressBtn.addEventListener('click', async () => {
     const state = progressBtn.dataset.state;
 
     if (state === 'next') {
       if (!validateCurrent()) return;
 
-      const isLastIncoming = index + 1 === questions.length - 1;
-      goTo(index + 1);
+      const isLastIncoming = index + 1 === stages.length - 1;
+      await hideStage(index);
+      index = index + 1;
+      await showStage(index);
 
       if (isLastIncoming) {
         progressBtn.dataset.state = 'submit';
         progressBtn.textContent = 'Submit';
       }
+      focusCurrentTitle();
     } else if (state === 'submit') {
       if (!validateCurrent()) return;
       form.requestSubmit ? form.requestSubmit() : form.submit();
@@ -48,57 +91,19 @@
     }
   });
 
-  // Core: move to a target step, applying that step's unique animations
-  function goTo(targetIndex) {
-    const leaving = questions[index];
-    const entering = questions[targetIndex];
-
-    if (leaving) {
-      const outClass = leaving.dataset.out || 'out-left-blur';
-      leaving.classList.remove('active');
-      // ensure reflow so out animation plays even when toggling quickly
-      void leaving.offsetWidth;
-      leaving.classList.add(outClass);
-      // cleanup out class after anim completes
-      leaving.addEventListener('animationend', function cleanOut(e){
-        if (e.target !== leaving) return;
-        leaving.classList.remove(outClass);
-        leaving.removeEventListener('animationend', cleanOut);
-      });
-    }
-
-    if (entering) {
-      const inClass = entering.dataset.in || 'in-pop';
-      entering.classList.add('active');
-      // play the in animation fresh each time
-      entering.classList.remove(inClass);
-      void entering.offsetWidth;
-      entering.classList.add(inClass);
-
-      entering.addEventListener('animationend', function cleanIn(e){
-        if (e.target !== entering) return;
-        entering.classList.remove(inClass);
-        entering.removeEventListener('animationend', cleanIn);
-      });
-    }
-
-    index = targetIndex;
-    entering?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  // Validation limited to the current step
+  // Validation limited to current stage
   function validateCurrent() {
-    const step = questions[index];
-    if (!step) return true;
+    const stage = stages[index];
+    if (!stage) return true;
 
-    const radios = step.querySelectorAll('input[type="radio"]');
+    const radios = stage.querySelectorAll('input[type="radio"]');
     if (radios.length) {
       const names = [...new Set([...radios].map(r => r.name))];
       for (const name of names) {
-        const group = step.querySelectorAll(`input[type="radio"][name="${name}"]`);
+        const group = stage.querySelectorAll(`input[type="radio"][name="${name}"]`);
         const checked = [...group].some(r => r.checked);
         if (!checked) {
-          pulse(step);
+          pulse(stage.querySelector('.card') || stage);
           group[0].focus();
           return false;
         }
@@ -106,10 +111,10 @@
       return true;
     }
 
-    const fields = step.querySelectorAll('textarea[required], input[required], select[required]');
+    const fields = stage.querySelectorAll('textarea[required], input[required], select[required]');
     for (const el of fields) {
       if (!el.value.trim()) {
-        pulse(step);
+        pulse(stage.querySelector('.card') || stage);
         el.focus();
         return false;
       }
@@ -123,7 +128,7 @@
   }
 
   function focusCurrentTitle(){
-    const title = questions[index]?.querySelector('.question-title, legend');
+    const title = stages[index]?.querySelector('.question-title, legend');
     if (title) {
       title.setAttribute('tabindex','-1');
       title.focus({preventScroll:true});
